@@ -297,7 +297,7 @@ namespace NortonCommanderInterface
                 PrintAt(x, y, formattedName);
             }
 
-            PrintAt(1, 21, "..         ►КАТАЛОГ◄ 11.10.02 19:48");
+            PrintAt(1, 21, "..           ►КАТАЛОГ◄ 11.10.02 19:48");
         }
 
         //Правая панель
@@ -369,7 +369,7 @@ namespace NortonCommanderInterface
                 PrintAt(timePos, y, time);
             }
 
-            PrintAt(40, 21, "..          ►КАТАЛОГ◄  11.10.02 19:48");
+            PrintAt(40, 21, "..            ►КАТАЛОГ◄  11.10.02 19:48");
         }
 
         //Двойные рамки для панелей
