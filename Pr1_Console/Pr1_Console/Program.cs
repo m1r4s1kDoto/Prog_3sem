@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace NortonCommanderInterface
@@ -23,13 +23,8 @@ namespace NortonCommanderInterface
         }
     }
 
-
     class Program
     {
-        //Размеры базового интерфейса Norton Commander
-        const int ScreenWidth = 80;
-        const int ScreenHeight = 25;
-
         //Символы псевдографики:
         const char SingleHoriz = '\u2500'; // ─
         const char SingleVert = '\u2502'; // │
@@ -51,29 +46,32 @@ namespace NortonCommanderInterface
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.Title = "Norton Commander"; //Устанавливаем имя окна
 
-            //Устанавливаем стартовые размеры окна
-            Console.SetWindowSize(80, 25);
-            Console.SetBufferSize(80, 25);
+            // Сначала полностью очищаем экран и сбрасываем буфер от мусора запуска
+            ClearScreenBlack();
 
+            // Жестко задаем размеры окна и буфера
+            try
+            {
+                Console.SetWindowSize(80, 25);
+                Console.SetBufferSize(80, 25);
+            }
+            catch
+            {
+                // На случай ограничений шрифта терминала
+            }
+
+            ClearScreenBlack();
             Console.CursorVisible = false; //Делаем курсор невидимым
 
             //Загрузка тестовых данных
             List<FileItem> leftPanelFiles = GetLeftPanelData();
             List<FileItem> rightPanelFiles = GetRightPanelData();
 
+            string commandLineInput = ""; // Переменная для хранения вводимого текста
+
             // Функция полной перерисовки всего интерфейса с полной очисткой буфера экрана
             void RedrawAll()
             {
-                // Синхронизируем размер буфера с текущим размером окна, чтобы избежать скролла и хвостов
-                if (Console.BufferWidth != Console.WindowWidth || Console.BufferHeight != Console.WindowHeight)
-                {
-                    try
-                    {
-                        Console.SetBufferSize(Math.Max(80, Console.WindowWidth), Math.Max(25, Console.WindowHeight));
-                    }
-                    catch { }
-                }
-
                 ClearScreenBlack();
                 DrawBackground(0, 167, 160); //Закраска заднего фона
 
@@ -82,7 +80,7 @@ namespace NortonCommanderInterface
                 DrawFunctionKeys();
                 DrawLeftPanel(leftPanelFiles);
                 DrawRightPanel(rightPanelFiles);
-                DrawBottomCommandLine();
+                DrawBottomCommandLine(commandLineInput);
             }
 
             RedrawAll();
@@ -103,22 +101,51 @@ namespace NortonCommanderInterface
                     RedrawAll();
                 }
 
-                // Установка курсора в командную строку
-                int offsetX = Math.Max(0, (Console.WindowWidth - ScreenWidth) / 2);
-                int offsetY = Math.Max(0, (Console.WindowHeight - ScreenHeight) / 2);
-                if (offsetX + 7 < Console.WindowWidth && offsetY + 23 < Console.WindowHeight)
+                // Установка курсора в командную строку с точным расчетом позиции
+                int cursorX = 0;
+                string promptFull = "C:\\NC>" + commandLineInput;
+                cursorX = promptFull.Length;
+
+                if (cursorX < Console.WindowWidth && 23 < Console.WindowHeight)
                 {
-                    Console.SetCursorPosition(offsetX + 7, offsetY + 23);
+                    Console.SetCursorPosition(cursorX, 23);
                     Console.CursorVisible = true;
                 }
 
                 if (Console.KeyAvailable)
                 {
-                    var key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.Escape) break; // Выход из программы по нажатию Esc
+                    var key = Console.ReadKey(true); // Читаем клавишу без дублирования системой
+
+                    if (key.Key == ConsoleKey.Escape)
+                    {
+                        break; // Выход из программы по нажатию Esc
+                    }
+                    else if (key.Key == ConsoleKey.Enter)
+                    {
+                        // Здесь можно обработать выполнение команды (например, очистить строку или выполнить)
+                        commandLineInput = "";
+                        DrawBottomCommandLine(commandLineInput);
+                    }
+                    else if (key.Key == ConsoleKey.Backspace)
+                    {
+                        if (commandLineInput.Length > 0)
+                        {
+                            commandLineInput = commandLineInput.Substring(0, commandLineInput.Length - 1);
+                            DrawBottomCommandLine(commandLineInput);
+                        }
+                    }
+                    else if (!char.IsControl(key.KeyChar))
+                    {
+                        // Ограничим длину ввода, чтобы не вылезать за рамки экрана (максимум ~70 символов)
+                        if (commandLineInput.Length < 70)
+                        {
+                            commandLineInput += key.KeyChar;
+                            DrawBottomCommandLine(commandLineInput);
+                        }
+                    }
                 }
 
-                Thread.Sleep(50);
+                Thread.Sleep(30);
             }
 
             Console.ResetColor();
@@ -126,10 +153,9 @@ namespace NortonCommanderInterface
             Console.Clear();
         }
 
-        //Полная очистка экрана и истории терминала (убирает старые кадры сверху)
+        //Полная очистка экрана и истории терминала
         static void ClearScreenBlack()
         {
-            // \u001b[3J очищает буфер прокрутки, \u001b[2J очищает экран, \u001b[H возвращает курсор в 0,0
             Console.Write("\u001b[48;2;0;0;0m\u001b[3J\u001b[2J\u001b[H");
         }
 
@@ -145,46 +171,35 @@ namespace NortonCommanderInterface
         }
 
         //Цветовые заготовки для выбора:
-        //Для текста
         static void SetPanelColors()
         {
             Console.Write("\u001b[48;2;0;0;168m");   // Синий фон
             Console.Write("\u001b[38;2;0;255;255m"); // Голубой шрифт
         }
 
-        //Для выделения
         static void SetSelectionColors()
         {
             Console.Write("\u001b[48;2;0;255;255m"); // Голубой фон
             Console.Write("\u001b[38;2;0;0;168m");   // Синий шрифт
         }
 
-        // Вспомогательный метод для печати слова с жёлтой первой буквой
+        // Печать слова с жёлтой первой буквой
         static void PrintItemWithHotkey(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
-
-            // 1. Первая буква жёлтая
             Console.Write("\u001b[38;2;255;255;0m" + text[0]);
-            // 2. Остальной текст чёрный
             Console.Write("\u001b[38;2;0;0;0m" + text.Substring(1));
         }
 
-        //Запись с выбранной точки (с динамическим центрированием)
+        // Запись с выбранной точки без центрирования (строго по координатам)
         static void PrintAt(int x, int y, string text)
         {
-            int offsetX = Math.Max(0, (Console.WindowWidth - ScreenWidth) / 2);
-            int offsetY = Math.Max(0, (Console.WindowHeight - ScreenHeight) / 2);
+            if (x >= Console.WindowWidth || y >= Console.WindowHeight) return;
 
-            int targetX = offsetX + x;
-            int targetY = offsetY + y;
+            if (x + text.Length > Console.WindowWidth)
+                text = text.Substring(0, Console.WindowWidth - x);
 
-            if (targetX >= Console.WindowWidth || targetY >= Console.WindowHeight) return;
-
-            if (targetX + text.Length > Console.WindowWidth)
-                text = text.Substring(0, Console.WindowWidth - targetX);
-
-            Console.SetCursorPosition(targetX, targetY);
+            Console.SetCursorPosition(x, y);
             Console.Write(text);
         }
 
@@ -194,47 +209,49 @@ namespace NortonCommanderInterface
             Console.Write("\u001b[38;2;0;0;0m"); //Черный шрифт
             PrintAt(0, 0, "     ");
 
-            PrintItemWithHotkey("Левая"); Console.Write("    ");
+            PrintItemWithHotkey("Левая"); Console.Write("   ");
             PrintItemWithHotkey("Файл"); Console.Write("    ");
             PrintItemWithHotkey("Диск"); Console.Write("    ");
-            PrintItemWithHotkey("Команды"); Console.Write("    ");
+            PrintItemWithHotkey("Команды"); Console.Write("   ");
             PrintItemWithHotkey("Правая");
 
-            // Часы справа (синий текст на бирюзовом фоне)
+            // Часы справа
             SetSelectionColors();
             PrintAt(75, 0, " 8 30");
         }
 
         //Командная строка снизу
-        static void DrawBottomCommandLine()
+        static void DrawBottomCommandLine(string input)
         {
             Console.Write("\u001b[48;2;0;0;0m\u001b[38;2;255;255;255m"); //Черный фон, белый шрифт
-            PrintAt(0, 23, "C:\\NC>                                                                          ");
+            string fullLine = "C:\\NC>" + input;
+
+            int maxLen = Console.WindowWidth;
+            if (fullLine.Length > maxLen)
+                fullLine = fullLine.Substring(0, maxLen);
+            else
+                fullLine = fullLine.PadRight(maxLen);
+
+            PrintAt(0, 23, fullLine);
         }
 
         //Функциональные кнопки снизу
         static void DrawFunctionKeys()
         {
-            int offsetX = Math.Max(0, (Console.WindowWidth - ScreenWidth) / 2);
-            int offsetY = Math.Max(0, (Console.WindowHeight - ScreenHeight) / 2);
-            int targetY = offsetY + 24;
-
+            int targetY = 24;
             if (targetY >= Console.WindowHeight) return;
 
-            Console.SetCursorPosition(offsetX, targetY);
-            string[] keys = { "Помощь", "Вызов ", "Чтение", "Правка", "Копия ", "НовИмя", "НовКат", "Удал-е", "Меню  ", "Выход" }; //Создаем массив строк
+            Console.SetCursorPosition(0, targetY);
+            string[] keys = { "Помощь", "Вызов ", "Чтение", "Правка", "Копия ", "НовИмя", "НовКат", "Удал-е", "Меню  ", "Выход" };
 
             for (int i = 0; i < keys.Length; i++)
             {
-                //Печатаем число
-                Console.Write("\u001b[48;2;0;0;0m\u001b[38;2;255;255;255m"); //Черный фон, белый шрифт
+                Console.Write("\u001b[48;2;0;0;0m\u001b[38;2;255;255;255m");
                 Console.Write(i + 1);
 
-                //Печатаем текст
-                Console.Write("\u001b[48;2;0;167;160m\u001b[38;2;0;0;0m"); //Бирюзовый фон, черный шрифт
+                Console.Write("\u001b[48;2;0;167;160m\u001b[38;2;0;0;0m");
                 Console.Write(keys[i]);
 
-                //Чёрный разделительный пробел между кнопками
                 if (i < keys.Length - 1)
                     Console.Write("\u001b[48;2;0;0;0m ");
             }
@@ -243,18 +260,16 @@ namespace NortonCommanderInterface
         //Левая панель
         static void DrawLeftPanel(List<FileItem> items)
         {
-            // Сортировка: сначала папки, затем файлы по алфавиту
             items.Sort((a, b) => {
                 if (a.IsDirectory != b.IsDirectory)
                     return b.IsDirectory.CompareTo(a.IsDirectory);
                 return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
             });
 
-            DrawDoubleBox(0, 1, 39, 22, " C:\\NC ", false); //Левая двойная рамка
-            Console.Write("\u001b[48;2;0;0;168m\u001b[38;2;255;255;255m"); //Синий фон, белый шрифт
+            DrawDoubleBox(0, 1, 39, 22, " C:\\NC ", false);
+            Console.Write("\u001b[48;2;0;0;168m\u001b[38;2;255;255;255m");
             PrintAt(1, 2, "C:\u2193  Имя         Имя          Имя");
 
-            //Разделения внутри левой панели
             SetPanelColors();
             DrawHorizLine(0, 20, 39, DoubleJoinLeft, DoubleJoinRight);
             PrintAt(13, 1, DoubleJoinTop.ToString());
@@ -267,40 +282,37 @@ namespace NortonCommanderInterface
             PrintAt(13, 20, SingleJoinBottom.ToString());
             PrintAt(26, 20, SingleJoinBottom.ToString());
 
-            int maxItemsCol = 17; //Максимальное число файлов в колонке
+            int maxItemsCol = 17;
             for (int i = 0; i < items.Count && i < maxItemsCol * 3; i++)
             {
-                int col = i / maxItemsCol; //Текущая колонка
-                int row = i % maxItemsCol; //Текущая строка
+                int col = i / maxItemsCol;
+                int row = i % maxItemsCol;
 
                 int x = 1 + col * 13;
                 int y = 3 + row;
 
                 var item = items[i];
-                // Для третьего столбца (индекс 2) делаем ширину меньше, чтобы не вылезать за рамку
                 int nameLength = (col == 2) ? 11 : 12;
-                string formattedName = FormatFileName(item.Name, nameLength); //Форматируем имя
+                string formattedName = FormatFileName(item.Name, nameLength);
                 PrintAt(x, y, formattedName);
             }
 
-            PrintAt(1, 21, "..           ►КАТАЛОГ◄ 11.10.02 19:48");
+            PrintAt(1, 21, "..         ►КАТАЛОГ◄ 11.10.02 19:48");
         }
 
         //Правая панель
         static void DrawRightPanel(List<FileItem> items)
         {
-            // Сортировка: сначала папки, затем файлы по алфавиту
             items.Sort((a, b) => {
                 if (a.IsDirectory != b.IsDirectory)
                     return b.IsDirectory.CompareTo(a.IsDirectory);
                 return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
             });
 
-            DrawDoubleBox(39, 1, 41, 22, " C:\\NC ", true); //Правая двойная рамка
-            Console.Write("\u001b[48;2;0;0;168m\u001b[38;2;255;255;255m"); //Синий фон, белый шрифт
+            DrawDoubleBox(39, 1, 41, 22, " C:\\NC ", true);
+            Console.Write("\u001b[48;2;0;0;168m\u001b[38;2;255;255;255m");
             PrintAt(40, 2, $"C:\u2193 Имя         Размер    Дата   Время");
 
-            //Разделения внутри правой панели
             SetPanelColors();
             DrawHorizLine(39, 20, 41, DoubleJoinLeft, DoubleJoinRight);
             PrintAt(53, 1, DoubleJoinTop.ToString());
@@ -316,22 +328,31 @@ namespace NortonCommanderInterface
             PrintAt(63, 20, SingleJoinBottom.ToString());
             PrintAt(72, 20, SingleJoinBottom.ToString());
 
-            int maxItems = 17; //Максимальное число файлов
+            int maxItems = 17;
             int namePos = 40;
             int sizePos = 54;
             int datePos = 64;
             int timePos = 73;
+
+            // Задаем ширину столбцов для правильного выравнивания по правому краю
+            int nameWidth = 12;
+            int sizeWidth = 9; 
+            int dateWidth = 8;
+            int timeWidth = 6;
+
             for (int i = 0; i < items.Count && i <= maxItems; i++)
             {
                 int y = 3 + i;
 
                 var item = items[i];
-                string name = FormatFileName(item.Name, 13).PadRight(12);
+                string name = FormatFileName(item.Name, 13).PadRight(nameWidth);
+                // Размер, дата и время выравниваются по правому краю (.PadLeft)
                 string size = item.IsDirectory ? "►КАТАЛОГ◄" : item.Size.ToString();
-                string date = item.LastWriteTime.ToString("dd.MM.yy");
-                string time = item.LastWriteTime.ToString("H:mm").PadLeft(5);
+                size = size.PadLeft(sizeWidth);
 
-                //Если файл выделен
+                string date = item.LastWriteTime.ToString("dd.MM.yy").PadLeft(dateWidth);
+                string time = item.LastWriteTime.ToString("H:mm").PadLeft(timeWidth);
+
                 if (i == 0)
                 {
                     SetSelectionColors();
@@ -348,20 +369,18 @@ namespace NortonCommanderInterface
                 PrintAt(timePos, y, time);
             }
 
-            PrintAt(40, 21, "..            ►КАТАЛОГ◄  11.10.02 19:48");
+            PrintAt(40, 21, "..          ►КАТАЛОГ◄  11.10.02 19:48");
         }
 
         //Двойные рамки для панелей
         static void DrawDoubleBox(int left, int top, int width, int height, string title, bool status)
         {
             SetPanelColors();
-            PrintAt(left, top, DoubleTL + new string(DoubleHoriz, width - 2) + DoubleTR); //Верхняя граница
-            //Боковые границы
+            PrintAt(left, top, DoubleTL + new string(DoubleHoriz, width - 2) + DoubleTR);
             for (int y = 1; y < height - 1; y++)
                 PrintAt(left, top + y, DoubleVert + new string(' ', width - 2) + DoubleVert);
-            PrintAt(left, top + height - 1, DoubleBL + new string(DoubleHoriz, width - 2) + DoubleBR); //Нижняя граница
+            PrintAt(left, top + height - 1, DoubleBL + new string(DoubleHoriz, width - 2) + DoubleBR);
 
-            //Печать надписи
             if (status)
                 SetSelectionColors();
             else
@@ -379,15 +398,13 @@ namespace NortonCommanderInterface
         //Форматирование имен файлов
         static string FormatFileName(string name, int maxLength)
         {
-            int dotIndex = name.LastIndexOf('.'); //Находим последнюю точку
+            int dotIndex = name.LastIndexOf('.');
 
-            // Случай 1: Файл имеет расширение (и точка не первая)
             if (dotIndex > 0)
             {
                 string baseName = name.Substring(0, dotIndex);
-                string ext = name.Substring(dotIndex + 1); // Расширение БЕЗ точки
+                string ext = name.Substring(dotIndex + 1);
 
-                // Если имя с расширением целиком влезает в отведённую ширину
                 if (name.Length <= maxLength)
                 {
                     int spacesCount = maxLength - baseName.Length - ext.Length;
@@ -397,8 +414,7 @@ namespace NortonCommanderInterface
                     }
                 }
 
-                // Если файл слишком длинный — обрезаем baseName, ставим '~' и прижимаем ext вправо
-                int allowedBaseLength = maxLength - ext.Length - 1; // -1 для тильды '~'
+                int allowedBaseLength = maxLength - ext.Length - 1;
                 if (allowedBaseLength > 0)
                 {
                     string truncatedBase = baseName.Length > allowedBaseLength
@@ -410,20 +426,17 @@ namespace NortonCommanderInterface
                 }
             }
 
-            // Случай 2: Файл/папка без расширения
             if (name.Length <= maxLength)
                 return name.PadRight(maxLength);
 
-            // Если длинное имя без расширения — обрезаем и ставим '~' в конце
             return name.Substring(0, maxLength - 1) + "~";
         }
 
-        //Тестовые данные:
-        //Файлы в левой панели
         static List<FileItem> GetLeftPanelData()
         {
             return new List<FileItem>
             {
+                // 1-я колонка (17 элементов)
                 new FileItem("..", true),
                 new FileItem("GAMES", true),
                 new FileItem("DOCUMENTS", true),
@@ -440,6 +453,9 @@ namespace NortonCommanderInterface
                 new FileItem("ncdd.exe", false, 255),
                 new FileItem("ncedit.exe", false, 255),
                 new FileItem("telemax.exe", false, 255),
+                new FileItem(" dosshell.exe", false, 256000),
+
+                // 2-я колонка (17 элементов)
                 new FileItem("vector.exe", false, 255),
                 new FileItem("command.com", false, 54619),
                 new FileItem("autoexec.bat", false, 128),
@@ -453,7 +469,29 @@ namespace NortonCommanderInterface
                 new FileItem("database.dbf", false, 512000),
                 new FileItem("archive.zip", false, 2048000),
                 new FileItem("keyrus.com", false, 12000),
-                new FileItem("mouse.com", false, 34000)
+                new FileItem("mouse.com", false, 34000),
+                new FileItem("sys.com", false, 18200),
+                new FileItem("format.com", false, 22500),
+                new FileItem("xcopy.exe", false, 15800),
+
+                // 3-я колонка (17 элементов)
+                new FileItem("TEMP", true),
+                new FileItem("BACKUP", true),
+                new FileItem("DRIVERS", true),
+                new FileItem("dn.exe", false, 230400),
+                new FileItem("disk.com", false, 15000),
+                new FileItem("fdisk.exe", false, 65000),
+                new FileItem("mem.exe", false, 32100),
+                new FileItem("attrib.exe", false, 15200),
+                new FileItem("chkdsk.exe", false, 28900),
+                new FileItem("debug.exe", false, 20500),
+                new FileItem("edit.com", false, 41300),
+                new FileItem("help.com", false, 11200),
+                new FileItem("qbasic.exe", false, 294000),
+                new FileItem("tree.com", false, 6800),
+                new FileItem("label.exe", false, 9300),
+                new FileItem("sort.exe", false, 7200),
+                new FileItem("fc.exe", false, 18900)
             };
         }
 
