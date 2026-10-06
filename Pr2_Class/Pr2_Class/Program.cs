@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
-using System.Xml.Serialization;
 
 namespace Pr2_Class
 {
@@ -166,17 +161,10 @@ namespace Pr2_Class
 
         public class Bush : Plant
         {
-
             //Конструктор
             public Bush(FlowerType type, Size size)
                 : base(type, size)
             {
-            }
-
-            //Метод для строкового представления
-            public override string ToString()
-            {
-                return $"Кустарник {Type}, размер: {PlantSize}";
             }
 
             public void Cut()
@@ -235,7 +223,7 @@ namespace Pr2_Class
             Name = name;
         }
 
-        //
+        //Метод для получения растения по инедксу
         public Plant GetPlant(int index)
         {
             if (index < 0 || index >= Plants.Count)
@@ -324,7 +312,7 @@ namespace Pr2_Class
                     case "1": AddMenu(); break;
                     case "2": RemoveMenu(); break;
                     case "3": ActionMenu(); break;
-                    case "4": Clear(); break;
+                    case "4": ClearGarden(); break;
                     case "5": Rename(); break;
                     case "6": GardenInfo(); break;
                     case "0": return;
@@ -364,13 +352,11 @@ namespace Pr2_Class
                     case "1":
                         var flower = CreateFlower();
                         if (flower != null) garden.AddPlant(flower);
-                        Pause();
                         break;
 
                     case "2":
                         var bush = CreateBush();
                         if (bush != null) garden.AddPlant(bush);
-                        Pause();
                         break;
 
                     case "0": return;
@@ -528,6 +514,7 @@ namespace Pr2_Class
                         {
                             Flower other = new Flower(flower);
                             garden.AddPlant(other);
+                            Console.WriteLine($"Было добавлено такое же {other}.");
                             Pause();
                             break;
                         }
@@ -561,7 +548,7 @@ namespace Pr2_Class
         }
 
         //Очистка сада
-        static void Clear()
+        static void ClearGarden()
         {
             if (garden.PlantCount == 0)
             {
@@ -598,7 +585,7 @@ namespace Pr2_Class
                 return;
             }
 
-            garden.Name = name.Trim();
+            garden.Name = name.Trim(); //Сохранение имени с обрезкой лишних пробелов
             Console.WriteLine($"Сад переименован в «{garden.Name}»");
         }
 
@@ -614,49 +601,76 @@ namespace Pr2_Class
         static Flower CreateFlower()
         {
             Console.WriteLine("ДОБАВЛЕНИЕ РАСТЕНИЯ");
+
+            //Вид
             Console.WriteLine("Доступные виды растений");
             var types = Enum.GetValues<FlowerType>();
             for (int i = 0; i < types.Length; i++)
                 Console.WriteLine($"{i + 1}. {types[i]}");
             Console.Write("Ваш выбор: ");
-
-            //Вид
-            int typeIdx = int.Parse(Console.ReadLine()) - 1;
-            FlowerType type = types[typeIdx];
+            if (!int.TryParse(Console.ReadLine(), out int typeIdx) || typeIdx < 1 || typeIdx > types.Length)
+            {
+                Console.WriteLine("Неверный выбор типа.");
+                Pause();
+                return null;
+            }
+            FlowerType type = types[typeIdx - 1];
 
             //Длина стебля
             Console.Write("Длина стебля (см): ");
-            double length = double.Parse(Console.ReadLine());
+            if (!double.TryParse(Console.ReadLine(), out double length) || length < 0)
+            {
+                Console.WriteLine("Неверная длина.");
+                Pause();
+                return null;
+            }
 
             //Количество
             Console.Write("Количество: ");
-            int quantity = int.Parse(Console.ReadLine());
+            if (!int.TryParse(Console.ReadLine(), out int quantity) || quantity < 0)
+            {
+                Console.WriteLine("Неверное количество.");
+                Pause();
+                return null;
+            }
 
             var flower = new Flower(type, new Size(length), quantity);
             Console.WriteLine($"Добавлено {flower}");
+            Pause();
             return flower;
         }
 
-        //Метод для
+        //Метод для добавления куста
         static Bush CreateBush()
         {
             Console.WriteLine("ДОБАВЛЕНИЕ КУСТА");
+
+            //Вид
             Console.WriteLine("Доступные виды растений");
             var types = Enum.GetValues<FlowerType>();
             for (int i = 0; i < types.Length; i++)
                 Console.WriteLine($"{i + 1}. {types[i]}");
             Console.Write("Ваш выбор: ");
-
-            //Вид
-            int typeIdx = int.Parse(Console.ReadLine()) - 1;
-            FlowerType type = types[typeIdx];
+            if (!int.TryParse(Console.ReadLine(), out int typeIdx) || typeIdx < 1 || typeIdx > types.Length)
+            {
+                Console.WriteLine("Неверный выбор типа.");
+                Pause();
+                return null;
+            }
+            FlowerType type = types[typeIdx - 1];
 
             //Длина
             Console.Write("Длина (см): ");
-            double length = double.Parse(Console.ReadLine());
+            if (!double.TryParse(Console.ReadLine(), out double length) || length < 0)
+            {
+                Console.WriteLine("Неверная длина.");
+                Pause();
+                return null;
+            }
 
             var bush = new Bush(type, new Size(length));
-            Console.WriteLine($"Добавлен {bush}");
+            Console.WriteLine($"Добавлено {bush}");
+            Pause();
             return bush;
         }
 
