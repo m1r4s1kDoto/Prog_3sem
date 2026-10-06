@@ -191,7 +191,7 @@ namespace NortonCommanderInterface
             Console.Write("\u001b[38;2;0;0;0m" + text.Substring(1));
         }
 
-        // Запись с выбранной точки без центрирования (строго по координатам)
+        // Запись с выбранной точки (строго по координатам)
         static void PrintAt(int x, int y, string text)
         {
             if (x >= Console.WindowWidth || y >= Console.WindowHeight) return;
@@ -342,6 +342,8 @@ namespace NortonCommanderInterface
 
             for (int i = 0; i < items.Count && i <= maxItems; i++)
             {
+                if (i >= 17)
+                    break;
                 int y = 3 + i;
 
                 var item = items[i];
@@ -453,7 +455,7 @@ namespace NortonCommanderInterface
                 new FileItem("ncdd.exe", false, 255),
                 new FileItem("ncedit.exe", false, 255),
                 new FileItem("telemax.exe", false, 255),
-                new FileItem(" dosshell.exe", false, 256000),
+                new FileItem("dossheддддддд.exe", false, 256000),
 
                 // 2-я колонка (17 элементов)
                 new FileItem("vector.exe", false, 255),
@@ -514,6 +516,9 @@ namespace NortonCommanderInterface
                 new FileItem("himem.sys", false, 14200, new DateTime(1993, 08, 11, 6, 00, 0)),
                 new FileItem("editor.exe", false, 95000, new DateTime(2001, 04, 19, 18, 15, 0)),
                 new FileItem("report_2026.pdf", false, 1048576, new DateTime(2026, 09, 10, 8, 45, 0)),
+                new FileItem("very_long_name_test.txt", false, 512, new DateTime(2026, 02, 28, 23, 59, 0)),
+                new FileItem("very_long_name_test.txt", false, 512, new DateTime(2026, 02, 28, 23, 59, 0)),
+                new FileItem("very_long_name_test.txt", false, 512, new DateTime(2026, 02, 28, 23, 59, 0)),
                 new FileItem("very_long_name_test.txt", false, 512, new DateTime(2026, 02, 28, 23, 59, 0))
             };
         }
