@@ -1,7 +1,136 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 
 namespace Lab1_Class
 {
+    //Класс для девайсов
+    public class ComputerDevice
+    {
+        public const int MaxMfrLength = 30; //Ограничение для полей
+
+        //Поля для хранения
+        protected string manufacturer; //Производитель
+        protected string model; //Модель
+
+        //Свойство для производителя
+        public virtual string Manufacturer
+        {
+            get => manufacturer;
+            set
+            {
+                Validate(value);
+                manufacturer = value;
+            }
+        }
+
+        //Свойство для модели
+        public virtual string Model
+        {
+            get => model;
+            set
+            {
+                Validate(value);
+                model = value;
+            }
+        }
+
+        //Конструктор по умолчанию
+        public ComputerDevice()
+        {
+            Manufacturer = "Unknown";
+            Model = "Unknown";
+        }
+
+        //Конструктор с параметрами
+        public ComputerDevice(string manufacturer, string model)
+        {
+            Manufacturer = manufacturer;
+            Model = model;
+        }
+
+        //Метод для проверки строк
+        protected void Validate(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                throw new ArgumentNullException("Ошибка: строка не может быть пустой");
+            if (str.Length >= MaxMfrLength)
+                throw new ArgumentOutOfRangeException("Ошибка: введенная строка слишком длинная");
+        }
+
+        public override string ToString()
+        {
+            return $"Устройство: производитель: {Manufacturer}, модель {Model}";
+        }
+    }
+
+    //Перечисление для типов клавиатур
+    public enum KeyboardType
+    {
+        Membrane, //Мембранная
+        Mechanical, //Механическая
+        Scissor, //Сенсорная
+        Optical, //Оптическая
+        Undefined //Неизвестно
+    }
+
+    //Класс для клавиатур
+    class Keyboard : ComputerDevice
+    {
+        //Ограничения для веса
+        public const double MinWeight = 100;
+        public const double MaxWeight = 5000;
+
+        //Поля класса
+        public KeyboardType Type { get; init; } //Тип клавиатуры
+        public bool Backlight { get; init; } //Наличие подсветки
+        public double Weight { get; init; } //Вес в граммах
+
+        //Конструктор по умолчанию
+        public Keyboard()
+            : base()
+        {
+            Type = KeyboardType.Undefined;
+            Backlight = false;
+            Weight = MinWeight;
+        }
+
+        //Конструктор с параметрами
+        public Keyboard(string manufacturer, string model,  KeyboardType type, bool backlight, double weight)
+            : base(manufacturer, model)
+        {
+            ValidateWeight(weight);
+            Type = type;
+            Backlight = backlight;
+            Weight = weight;
+        }
+
+        //Метод для проверки веса
+        private void ValidateWeight(double w)
+        {
+            if (w < MinWeight || w > MaxWeight)
+                throw new ArgumentOutOfRangeException("Недопустимый вес клавиатуры");
+        }
+
+        //Метод для преобразования перечисления
+        public static string TypeToString(KeyboardType type)
+        {
+            return type switch
+            {
+                KeyboardType.Membrane => "Мембранная",
+                KeyboardType.Mechanical => "Механическая",
+                KeyboardType.Scissor => "Ножничная",
+                KeyboardType.Optical => "Оптическая",
+                _ => "Не указано"
+            };
+        }
+
+        public override string ToString()
+        {
+            return $"Клавиатура:\nПроизводитель: {Manufacturer}, Модель: {Model}, Тип: {Type}, Наличие подсветки: {(Backlight ? "Есть" : "Нет")}, Вес: {Weight} грамм";
+        }
+    }
+
     //Перечисление для типов матриц
     public enum PanelType
     {
@@ -14,6 +143,7 @@ namespace Lab1_Class
         undefined //Неизвестно
     };
 
+    //
     class Monitor
     {
         //Ограничения для полей:
@@ -24,19 +154,24 @@ namespace Lab1_Class
         public const int MinRes = 640; //Минимальная длина одной стороны в пикселях
         public const int MaxRes = 7680; //Максимальная длина одной стороны в пикселях
 
-        //Поля класса:
-        double diagonal; //Диагональ
-        int width; //Ширина в пикселях
-        int height; //Высота в пикселях
-        int refreshRate; //Частота обновления
+        //Поля класса
+        public double Diagonal { get; init; } //Диагональ
+        public int Width { get; init; } //Ширина в пикселях
+        public int height { get; init; } //Высота в пикселях
+        public int refreshRate { get; init; } //Частота обновления
+        PanelType type { get; init; } //Тип матрциы
+
+        private void ValidateDiagonal(double d)
+        {
+        }
 
         //Конструктор с параметрами
-        public Monitor(double Diagonal, int Width, int Height, int RefreshRate) 
+        public Monitor(double diagonal, int width, int height, int refreshRate) 
         {
-            diagonal = Diagonal;
-            width = Width;
-            height = Height;
-            refreshRate = RefreshRate;
+            Diagonal = diagonal;
+            Width = width;
+            Height = height;
+            RefreshRate = refreshRate;
         }
     }
 
