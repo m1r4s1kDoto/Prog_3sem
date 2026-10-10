@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
+using System.Reflection.PortableExecutable;
 
 namespace Lab1_Class
 {
@@ -109,7 +110,7 @@ namespace Lab1_Class
         private void ValidateWeight(double w)
         {
             if (w < MinWeight || w > MaxWeight)
-                throw new ArgumentOutOfRangeException("Недопустимый вес клавиатуры");
+                throw new ArgumentOutOfRangeException("Ошибка: недопустимый вес клавиатуры");
         }
 
         //Метод для преобразования перечисления
@@ -144,7 +145,7 @@ namespace Lab1_Class
     };
 
     //
-    class Monitor
+    class Monitor : ComputerDevice
     {
         //Ограничения для полей:
         public const double MinDiagonal = 10.0; //Минимальная диагональ
@@ -157,21 +158,52 @@ namespace Lab1_Class
         //Поля класса
         public double Diagonal { get; init; } //Диагональ
         public int Width { get; init; } //Ширина в пикселях
-        public int height { get; init; } //Высота в пикселях
-        public int refreshRate { get; init; } //Частота обновления
+        public int Height { get; init; } //Высота в пикселях
+        public int RefreshRate { get; init; } //Частота обновления
         PanelType type { get; init; } //Тип матрциы
 
+        //Метод для проверки диагонали
         private void ValidateDiagonal(double d)
         {
+            if (d < MinDiagonal || d > MaxDiagonal)
+                throw new ArgumentOutOfRangeException("Ошибка: недопустимая диагональ экрана");
+        }
+
+        //Метод для проверки разрешения
+        private void ValidateResolution(int w, int h)
+        {
+            if (h < MinRes || w < MinRes || h > MaxRes || w > MaxRes)
+                throw new ArgumentOutOfRangeException("Ошибка: недопустимое разрешенме экрана");
+        }
+
+        private void ValidateRefreshRate(int r)
+        {
+            if (r < MinRefrate || r > MaxRefrate)
+                throw new ArgumentOutOfRangeException("Ошибка: недопустимая частота обновления экрана");
+        }
+
+        //Конструктор по умолчанию
+        public Monitor()
+            : base()
+        {
+            Diagonal = MinDiagonal;
+            Width = MinRes;
+            Height = MinRes;
+
         }
 
         //Конструктор с параметрами
-        public Monitor(double diagonal, int width, int height, int refreshRate) 
+        public Monitor(string manufacturer, string model, double diagonal, int width, int height, int refreshRate, PanelType type) 
+            : base (manufacturer, model)
         {
+            ValidateDiagonal(diagonal);
+            ValidateResolution(width, height);
+            ValidateRefreshRate(refreshRate);
             Diagonal = diagonal;
             Width = width;
             Height = height;
             RefreshRate = refreshRate;
+            Panel
         }
     }
 
