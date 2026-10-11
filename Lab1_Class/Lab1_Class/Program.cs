@@ -1,7 +1,6 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Headers;
-using System.Reflection.PortableExecutable;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Lab1_Class
 {
@@ -59,9 +58,16 @@ namespace Lab1_Class
                 throw new ArgumentOutOfRangeException("Ошибка: введенная строка слишком длинная");
         }
 
+        //Метод для строкового представления
         public override string ToString()
         {
-            return $"Устройство: производитель: {Manufacturer}, модель {Model}";
+            return $"Устройство:\n Производитель: {Manufacturer}, Модель {Model}";
+        }
+
+        //Метод для получения названия устройства
+        public virtual string GetName()
+        {
+            return $"Устройство {Manufacturer} {Model}";
         }
     }
 
@@ -126,9 +132,16 @@ namespace Lab1_Class
             };
         }
 
+        //Метод для строкового представления
         public override string ToString()
         {
-            return $"Клавиатура:\nПроизводитель: {Manufacturer}, Модель: {Model}, Тип: {Type}, Наличие подсветки: {(Backlight ? "Есть" : "Нет")}, Вес: {Weight} грамм";
+            return $"Клавиатура:\n Производитель: {Manufacturer}, Модель: {Model}, Тип: {Type}, Наличие подсветки: {(Backlight ? "Есть" : "Нет")}, Вес: {Weight} грамм.";
+        }
+
+        //Метод для получения назваания клавиатуры
+        public override string GetName()
+        {
+            return $"Клавиатура {Manufacturer} {Model}";
         }
     }
 
@@ -160,7 +173,7 @@ namespace Lab1_Class
         public int Width { get; init; } //Ширина в пикселях
         public int Height { get; init; } //Высота в пикселях
         public int RefreshRate { get; init; } //Частота обновления
-        PanelType type { get; init; } //Тип матрциы
+        PanelType Type { get; init; } //Тип матрциы
 
         //Метод для проверки диагонали
         private void ValidateDiagonal(double d)
@@ -189,7 +202,7 @@ namespace Lab1_Class
             Diagonal = MinDiagonal;
             Width = MinRes;
             Height = MinRes;
-
+            Type = PanelType.undefined;
         }
 
         //Конструктор с параметрами
@@ -203,12 +216,86 @@ namespace Lab1_Class
             Width = width;
             Height = height;
             RefreshRate = refreshRate;
-            Panel
+            Type = type;
+        }
+
+        public static string TypeToString(PanelType type)
+        {
+            return type switch
+            {
+                PanelType.IPS => "IPS",
+                PanelType.VA => "VA",
+                PanelType.TN => "TN",
+                PanelType.OLED => "OLED",
+                _ => "Не указано"
+            };
+        }
+
+        public override string ToString()
+        {
+            return $"Монитор:\n Производитель: {Manufacturer}, Модель: {Model}, Диагональ: {Diagonal}, " +
+                $"Разрешение: {Width}x{Height}, Частота обновления: {RefreshRate}, Тип матрицы: {TypeToString(Type)}.";
+        }
+
+        //Метод для получения названия монитора
+        public override string GetName()
+        {
+            return $"Монитор {Manufacturer} {Model}";
         }
     }
 
     class Program
     {
+        static void Main()
+        {
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.Clear();
 
+            try
+            {
+                Console.WriteLine("ТЕСТИРОВАНИЕ РАБОТЫ КЛАССОВ");
+
+                //Массив из объектов класса
+                ComputerDevice[] devicesArray = new ComputerDevice[]
+                {
+                new ComputerDevice("Manufacturer", "Model"),
+                new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023),
+                new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS)
+                };
+
+                //Проверка полиморфных методов
+                foreach (var device in devicesArray)
+                {
+                    Console.WriteLine(device.GetName()); //GetName
+                    Console.WriteLine(device.ToString()); //ToString
+                    Console.WriteLine();
+                }
+
+                //Лист из объектов класса
+                List<ComputerDevice> deviceList = new List<ComputerDevice>();
+                deviceList.Add(new Keyboard("Razer", "BlackWidow", KeyboardType.Mechanical, true, 1300));
+                deviceList.Add(new Monitor("MSI", "Optix", 24.5, 1920, 1080, 240, PanelType.VA));
+
+                foreach (var device in deviceList)
+                {
+                    Console.WriteLine(device.GetName()); //GetName
+                    Console.WriteLine(device.ToString()); //ToString
+                    Console.WriteLine();
+                }
+
+                //Проверка валидации
+                var invalidKeyboard = new Keyboard("BadBrand", "BadModel", KeyboardType.Membrane, false, 50); //Недопустимый вес клавиатуры
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine($"\nПоймано исключение валидации: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nПроизошла непредвиденная ошибка: {ex.Message}");
+            }
+            Console.WriteLine("КОНЕЦ ТЕСТИРОВАНИЯ");
+        }
     }
 }
