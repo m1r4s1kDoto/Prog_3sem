@@ -88,7 +88,7 @@ namespace Lab1_Class
         public const double MinWeight = 100;
         public const double MaxWeight = 5000;
 
-        //Поля класса
+        //Свойства класса
         public KeyboardType Type { get; init; } //Тип клавиатуры
         public bool Backlight { get; init; } //Наличие подсветки
         public double Weight { get; init; } //Вес в граммах
@@ -168,7 +168,7 @@ namespace Lab1_Class
         public const int MinRes = 640; //Минимальная длина одной стороны в пикселях
         public const int MaxRes = 7680; //Максимальная длина одной стороны в пикселях
 
-        //Поля класса
+        //Свойства класса
         public double Diagonal { get; init; } //Диагональ
         public int Width { get; init; } //Ширина в пикселях
         public int Height { get; init; } //Высота в пикселях
@@ -259,9 +259,10 @@ namespace Lab1_Class
                 //Массив из объектов класса
                 ComputerDevice[] devicesArray = new ComputerDevice[]
                 {
-                new ComputerDevice("Manufacturer", "Model"),
-                new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023),
-                new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS)
+                    new ComputerDevice(),
+                    new ComputerDevice("Manufacturer", "Model"),
+                    new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023),
+                    new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS)
                 };
 
                 //Проверка полиморфных методов
