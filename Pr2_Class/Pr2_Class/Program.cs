@@ -19,8 +19,9 @@ namespace Pr2_Class
     //Структура для размера
     public struct Size
     {
-        private double _length; //Длина стебля в сантиметрах
+        private double _length; //Поле для хранения длины стебля в сантиметрах
 
+        //Свойство
         public double Length
         {
             get => _length;
@@ -47,6 +48,7 @@ namespace Pr2_Class
         }
     }
 
+    //Базовый класс для растений
     public class Plant
     {
         public FlowerType Type { get; set; } //Тип цветка
@@ -250,12 +252,12 @@ namespace Pr2_Class
             return removed;
         }
 
+        //Метод для удаления растения по индексу
         public bool RemovePlantAt(int index)
         {
             if (index < 0 || index >= Plants.Count)
                 return false;
 
-            Plant removed = Plants[index];
             Plants.RemoveAt(index);
             return true;
         }
