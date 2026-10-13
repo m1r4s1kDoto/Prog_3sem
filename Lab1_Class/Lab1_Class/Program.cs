@@ -16,7 +16,7 @@ namespace Lab1_Class
         public virtual string Manufacturer
         {
             get => manufacturer;
-            set
+            init
             {
                 Validate(value);
                 manufacturer = value;
@@ -27,7 +27,7 @@ namespace Lab1_Class
         public virtual string Model
         {
             get => model;
-            set
+            init
             {
                 Validate(value);
                 model = value;

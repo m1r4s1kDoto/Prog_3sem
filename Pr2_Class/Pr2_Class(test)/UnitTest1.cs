@@ -5,7 +5,6 @@ namespace Pr2_Class_test_
         [Fact]
         public void Test1()
         {
-            Console.WriteLine("Wassup, world!");
         }
     }
 }
