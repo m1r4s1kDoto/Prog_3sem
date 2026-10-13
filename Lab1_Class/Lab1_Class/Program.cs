@@ -251,11 +251,11 @@ namespace Lab1_Class
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
             Console.Clear();
-
+            Console.WriteLine("ТЕСТИРОВАНИЕ РАБОТЫ КЛАССОВ");
+            //Тестирование корректных объектов
             try
             {
-                Console.WriteLine("ТЕСТИРОВАНИЕ РАБОТЫ КЛАССОВ");
-
+                Console.WriteLine("Тестирование корректных объектов");
                 //Массив из объектов класса
                 ComputerDevice[] devicesArray = new ComputerDevice[]
                 {
@@ -284,17 +284,63 @@ namespace Lab1_Class
                     Console.WriteLine(device.ToString()); //ToString
                     Console.WriteLine();
                 }
-
-                //Проверка валидации
-                var invalidKeyboard = new Keyboard("BadBrand", "BadModel", KeyboardType.Membrane, false, 50); //Недопустимый вес клавиатуры
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Console.WriteLine($"\nПоймано исключение валидации: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"\nПроизошла непредвиденная ошибка: {ex.Message}");
+                Console.WriteLine($"\nНепредвиденная ошибка в основных тестах: {ex.Message}");
+            }
+
+            //Тестирование ошибокк валидации
+            Console.WriteLine("Тестирование ошибок валидации");
+
+            //Слишком длинный производитель
+            try
+            {
+                var badDevice = new ComputerDevice("ОченьДлинноеИмяПроизводителяКотороеПревышаетЛимитВТридцатьСимволов", "Model");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Успешно поймано: {ex.Message}");
+            }
+
+            //Пустая модель
+            try
+            {
+                var badDevice2 = new ComputerDevice("Brand", "");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Успешно поймано: {ex.Message}");
+            }
+
+            //Слишком маленьккий вес клавиатуры
+            try
+            {
+                var badKeyboard = new Keyboard("BadBrand", "BadModel", KeyboardType.Membrane, false, 50);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Успешно поймано: {ex.Message}");
+            }
+
+            //Слишком большая диагональ
+            try
+            {
+                var badMonitor = new Monitor("Brand", "Model", 75.0, 1920, 1080, 144, PanelType.IPS);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Успешно поймано: {ex.Message}");
+            }
+
+            //Слишком низкая частота обновления
+            try
+            {
+                var badMonitorRefresh = new Monitor("Brand", "Model", 24.0, 1920, 1080, 30, PanelType.IPS);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Успешно поймано: {ex.Message}");
             }
             Console.WriteLine("КОНЕЦ ТЕСТИРОВАНИЯ");
         }
