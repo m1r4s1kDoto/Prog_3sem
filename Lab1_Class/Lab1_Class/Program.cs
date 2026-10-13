@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Lab1_Class
 {
@@ -82,7 +81,7 @@ namespace Lab1_Class
     }
 
     //Класс для клавиатур
-    class Keyboard : ComputerDevice
+    public class Keyboard : ComputerDevice
     {
         //Ограничения для веса
         public const double MinWeight = 100;
@@ -157,8 +156,8 @@ namespace Lab1_Class
         undefined //Неизвестно
     };
 
-    //
-    class Monitor : ComputerDevice
+    //Класс для мониторов
+    public class Monitor : ComputerDevice
     {
         //Ограничения для полей:
         public const double MinDiagonal = 10.0; //Минимальная диагональ
