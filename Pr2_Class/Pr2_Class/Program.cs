@@ -76,6 +76,7 @@ namespace Pr2_Class
         }
     }
 
+    //Класс для цветов 
     public class Flower : Plant
     {
         public int Quantity { get; set; } //Количество цветов
@@ -161,29 +162,31 @@ namespace Pr2_Class
         }
     }
 
-        public class Bush : Plant
+    //Класс для кустов
+    public class Bush : Plant
+    {
+        //Конструктор
+        public Bush(FlowerType type, Size size)
+            : base(type, size)
         {
-            //Конструктор
-            public Bush(FlowerType type, Size size)
-                : base(type, size)
-            {
-            }
-
-            public void Cut()
-            {
-                if (PlantSize.Length > 10)
-                {
-                    PlantSize  = new Size(PlantSize.Length-10);
-                    Console.WriteLine($"Вы подрезали {Type}. Размер: {PlantSize.Length}.");
-                }
-                else
-                {
-                    PlantSize = new Size(0);
-                    Console.WriteLine($"Вы подрезали {Type} полностью. Куст теперь 0 см.");
-                }
-            }
         }
 
+        public void Cut()
+        {
+            if (PlantSize.Length > 10)
+            {
+                PlantSize = new Size(PlantSize.Length - 10);
+                Console.WriteLine($"Вы подрезали {Type}. Размер: {PlantSize.Length}.");
+            }
+            else
+            {
+                PlantSize = new Size(0);
+                Console.WriteLine($"Вы подрезали {Type} полностью. Куст теперь 0 см.");
+            }
+        }
+    }
+
+    //Интерфейс для сада
     public interface IGarden
     {
         void ShowPlants();
@@ -195,7 +198,7 @@ namespace Pr2_Class
         int PlantCount { get; }
     }
 
-
+    //Класс, содержащий коллекцию растений и реализующий интерфейс
     public class Garden : IGarden
     {
         private List<Plant> Plants; //Лист для растений
@@ -302,6 +305,8 @@ namespace Pr2_Class
         static Garden garden = new Garden("Сад Сереги");
         static void Main()
         {
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.ForegroundColor = ConsoleColor.Black;
             while (true)
             {
                 Console.Clear();
@@ -435,6 +440,7 @@ namespace Pr2_Class
                 Console.WriteLine("1. Полить все растения");
                 Console.WriteLine("2. Выбрать растение для действия");
                 Console.WriteLine("0. Назад");
+                Console.Write("Ваш выбор: ");
                 string choice = Console.ReadLine();
 
                 switch (choice)
@@ -454,7 +460,7 @@ namespace Pr2_Class
             {
                 Console.Clear();
                 garden.ShowPlants();
-                Console.WriteLine("\nВыберите растение (0 - выход)");
+                Console.Write("\nВыберите растение (0 - выход): ");
 
                 //Безопасное чтение числа
                 if (!int.TryParse(Console.ReadLine(), out int choice))
@@ -505,6 +511,7 @@ namespace Pr2_Class
                 Console.WriteLine("4. Добавить такое же");
                 Console.WriteLine("5. Получить инструкции по уходу");
                 Console.WriteLine("0. Назад");
+                Console.Write("Ваш выбор: ");
                 string choice = Console.ReadLine();
 
                 switch (choice)
@@ -683,4 +690,3 @@ namespace Pr2_Class
         }
     }
 }
-//Были внесены изменения
