@@ -58,64 +58,76 @@ namespace Pr2_Class
     }
 
     //Базовый класс для растений
-    public class Plant
+    public abstract class Plant
     {
         public Size PlantSize { get; set; } //Размер цветка
         public readonly DateTime PlantedAt; //Время посадки (только для чтения)
 
         //Конструктор
-        public Plant(FlowerType type, Size size)
+        public Plant(Size size)
         {
-            Type = type;
             PlantSize = size;
             PlantedAt = DateTime.Now;
         }
 
+        //Метод, реализуемый наследниками
+        public abstract string GetTypeName();
+
         //Метод для поливания
         public void Watering()
         {
-            Console.WriteLine($"Вы полили {Type}. Пусть растет он большим и здоровым.");
+            Console.WriteLine($"Вы полили {GetTypeName()}. Пусть растет он большим и здоровым.");
         }
 
         //Метод для строкового представления
         public override string ToString()
         {
-            return $"Растение: {Type}, размер: {PlantSize}, дата и время посадки: {PlantedAt:dd.MM.yyyy HH:mm:ss}";
+            return $"Растение: {GetTypeName()}, размер: {PlantSize}, дата и время посадки: {PlantedAt:dd.MM.yyyy HH:mm:ss}";
         }
     }
 
     //Класс для цветов 
     public class Flower : Plant
     {
+        //Свойства
+        public FlowerType Type { get; set; } //Вид цветка
         public int Quantity { get; set; } //Количество цветов
+        public const int MaxQuantity = 1000; //Константа для ограничения        
 
-        const int MaxQuantity = 1000; //Константа для ограничения        
-
-        //Конструкторы:
+        //Конструкторы
         //Без количества
         public Flower(FlowerType type, Size size)
-            : base(type, size) //Вызов конструктора родителя
+            : base(size) //Вызов конструктора родителя
         {
+            Type = type;
             Quantity = 1;
         }
 
         //Полный
         public Flower(FlowerType type, Size size, int quantity)
-            : base(type, size) //Вызов конструктора родителя
+            : base(size) //Вызов конструктора родителя
         {
             if (quantity > MaxQuantity || quantity < 0)
             {
                 throw new ArgumentException($"Ошибка: количество должно быть от 0 до {MaxQuantity}");
             }
 
+            Type = type;
             Quantity = quantity;
         }
 
         //Копирования
         public Flower(Flower other)
-            : base(other.Type, other.PlantSize)
+            : base(other.PlantSize)
         {
+            Type = other.Type;
             Quantity = other.Quantity;
+        }
+        
+        //Реализация абстрактного метода
+        public override string GetTypeName()
+        {
+            return $"цветок {Type}";
         }
         
         //Метод для строкового представления
@@ -151,7 +163,6 @@ namespace Pr2_Class
                 FlowerType.Tulip => "Поливайте умеренно, держите в прохладе, не любит застой воды.",
                 FlowerType.Daisy => "Поливайте часто, любит свет, неприхотлива.",
                 FlowerType.Orchid => "Поливайте раз в неделю погружением, высокая влажность, непрямой свет.",
-                FlowerType.Hazel => "Поливайте умеренно, любит полутень, обрезайте весной.",
                 FlowerType.Pion => "Поливайте обильно в жару, любит солнце, подкармливайте весной.",
                 FlowerType.Sunflower => "Поливайте регулярно, нужно много солнца, высокий рост — подвязывайте.",
                 FlowerType.Lily => "Поливайте умеренно, любит свет, не переносит застой воды.",
@@ -173,24 +184,31 @@ namespace Pr2_Class
     //Класс для кустов
     public class Bush : Plant
     {
+        //Свойства
+        public BushType Type; //Вид куста
+
         //Конструктор
-        public Bush(FlowerType type, Size size)
-            : base(type, size)
+        public Bush(BushType type, Size size)
+            : base(size)
         {
+            Type = type;
+        }
+
+        //Реализация абстрактного метода
+        public override string GetTypeName()
+        {
+            return $"куст {Type}";
         }
 
         public void Cut()
         {
-            if (PlantSize.Length > 10)
+            if (PlantSize.Length > 15)
             {
                 PlantSize = new Size(PlantSize.Length - 10);
                 Console.WriteLine($"Вы подрезали {Type}. Размер: {PlantSize.Length}.");
             }
             else
-            {
-                PlantSize = new Size(0);
-                Console.WriteLine($"Вы подрезали {Type} полностью. Куст теперь 0 см.");
-            }
+                Console.WriteLine($"Вы не можете подрезать {Type}: Слишком маленький размер ({PlantSize.Length})");
         }
     }
 
@@ -674,7 +692,7 @@ namespace Pr2_Class
                 Pause();
                 return null;
             }
-            FlowerType type = types[typeIdx - 1];
+            BushType type = types[typeIdx - 1];
 
             //Длина
             Console.Write("Длина (см): ");
