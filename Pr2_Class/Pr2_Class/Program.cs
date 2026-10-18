@@ -10,10 +10,19 @@ namespace Pr2_Class
         Tulip, //Тюльпан
         Daisy, //Ромашка
         Orchid, //Орхидея
-        Hazel, //Орешник
         Pion, //Пион
         Sunflower, //Подсолнух
-        Lily //Лилия
+        Lily, //Лилия
+        Custom //Свой вариант
+    }
+
+    public enum BushType
+    {
+        Hazel,      //Орешник
+        Lilac,      //Сирень
+        Jasmine,    //Жасмин
+        Hawthorn,   //Боярышник
+        Custom      //Свой вариант
     }
 
     //Структура для размера
@@ -51,7 +60,6 @@ namespace Pr2_Class
     //Базовый класс для растений
     public class Plant
     {
-        public FlowerType Type { get; set; } //Тип цветка
         public Size PlantSize { get; set; } //Размер цветка
         public readonly DateTime PlantedAt; //Время посадки (только для чтения)
 
@@ -690,3 +698,4 @@ namespace Pr2_Class
         }
     }
 }
+//Заметка - переопределение
