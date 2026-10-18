@@ -99,6 +99,7 @@ namespace Pr2_Class
         public Flower(FlowerType type, Size size)
             : base(size) //Вызов конструктора родителя
         {
+
             Type = type;
             Quantity = 1;
         }
@@ -570,6 +571,7 @@ namespace Pr2_Class
                 Console.WriteLine("1. Полить");
                 Console.WriteLine("2. Подрезать");
                 Console.WriteLine("0. Назад");
+                Console.Write("Ваш выбор: ");
                 string choice = Console.ReadLine();
 
                 switch (choice)
@@ -682,7 +684,7 @@ namespace Pr2_Class
 
             //Вид
             Console.WriteLine("Доступные виды растений");
-            var types = Enum.GetValues<FlowerType>();
+            var types = Enum.GetValues<BushType>();
             for (int i = 0; i < types.Length; i++)
                 Console.WriteLine($"{i + 1}. {types[i]}");
             Console.Write("Ваш выбор: ");
