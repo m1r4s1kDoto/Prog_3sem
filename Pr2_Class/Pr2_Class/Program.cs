@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Security.AccessControl;
 
 namespace Pr2_Class
 {
@@ -89,32 +91,54 @@ namespace Pr2_Class
     //Класс для цветов 
     public class Flower : Plant
     {
-        //Свойства
         public FlowerType Type { get; set; } //Вид цветка
         public int Quantity { get; set; } //Количество цветов
+        private string _customName; //Свой вид (поле для хранения)
+        public string CustomName //Свой вид (свойство)
+        {
+            get => _customName;
+            set
+            {
+                if (Type != FlowerType.Custom)
+                    throw new ArgumentException($"Ошибка: нельзя присвоить этому растению другой вид");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Ошибка: для Custom нужно имя");
+                _customName = value;
+            }
+        }
+
+
         public const int MaxQuantity = 1000; //Константа для ограничения        
 
         //Конструкторы
         //Без количества
-        public Flower(FlowerType type, Size size)
+        public Flower(FlowerType type, Size size, string customName = null)
             : base(size) //Вызов конструктора родителя
         {
-
-            Type = type;
             Quantity = 1;
+            Type = type;
+            if (type == FlowerType.Custom)
+            {
+                if (string.IsNullOrWhiteSpace(customName))
+                    throw new ArgumentException("Ошибка: для Custom нужно имя");
+                CustomName = customName;
+            }
         }
 
         //Полный
-        public Flower(FlowerType type, Size size, int quantity)
+        public Flower(FlowerType type, Size size, int quantity, string customName = null)
             : base(size) //Вызов конструктора родителя
         {
             if (quantity > MaxQuantity || quantity < 0)
-            {
                 throw new ArgumentException($"Ошибка: количество должно быть от 0 до {MaxQuantity}");
-            }
-
             Type = type;
             Quantity = quantity;
+            if (type == FlowerType.Custom)
+            {
+                if (string.IsNullOrWhiteSpace(customName))
+                    throw new ArgumentException("Ошибка: для Custom нужно имя");
+                CustomName = customName;
+            }
         }
 
         //Копирования
@@ -123,12 +147,13 @@ namespace Pr2_Class
         {
             Type = other.Type;
             Quantity = other.Quantity;
+            CustomName = other.CustomName;
         }
         
         //Реализация абстрактного метода
         public override string GetTypeName()
         {
-            return $"цветок {Type}";
+            return $"цветок {(Type == FlowerType.Custom ? CustomName : Type)}";
         }
         
         //Метод для строкового представления
@@ -140,7 +165,7 @@ namespace Pr2_Class
         //Метод для вдыхания аромата
         public void Smelling()
         {
-            Console.WriteLine($"Вы вдохнули аромат {Type}. Надеемся, у вас нет никакой аллергии.");
+            Console.WriteLine($"Вы вдохнули аромат {(Type == FlowerType.Custom ? CustomName : Type)}. Надеемся, у вас нет никакой аллергии.");
         }
 
         //Метод для среза
@@ -149,15 +174,18 @@ namespace Pr2_Class
             if (Quantity > 0)
             {
                 Quantity--;
-                Console.WriteLine($"Вы срезали один {Type}. Осталось: {Quantity}.");
+                Console.WriteLine($"Вы срезали один {(Type == FlowerType.Custom ? CustomName : Type)}. Осталось: {Quantity}.");
             }
             else
                 Console.WriteLine($"Нечего срезать.");
         }
 
         //Метод с инструкцией по уходу
-        public static void GetTips(FlowerType type)
+        public static void GetTips(FlowerType type, string customName = null)
         {
+            if (type == FlowerType.Custom && string.IsNullOrWhiteSpace(customName))
+                throw new ArgumentException("Ошибка: для Custom нужно имя");
+
             string tips = type switch
             {
                 FlowerType.Rose => "Поливайте 2 раза в неделю, любит солнце, обрезайте увядшие бутоны.",
@@ -167,32 +195,50 @@ namespace Pr2_Class
                 FlowerType.Pion => "Поливайте обильно в жару, любит солнце, подкармливайте весной.",
                 FlowerType.Sunflower => "Поливайте регулярно, нужно много солнца, высокий рост — подвязывайте.",
                 FlowerType.Lily => "Поливайте умеренно, любит свет, не переносит застой воды.",
+                FlowerType.Custom => $"Уточните у продавца.",
                 _ => "Общие советы: поливайте умеренно, держите на свету."
             };
 
-            Console.WriteLine($"Инструкция по уходу за {type} : {tips}");
+            Console.WriteLine($"Инструкция по уходу за {(type == FlowerType.Custom ? customName : type)} : {tips}");
         }
 
         //Перегрузка арифметической оперции +
         public static Flower operator + (Flower A, Flower B)
         {
-            if (A.Type != B.Type)
-                throw new InvalidOperationException("Ошибка: нельзя складывать цветы разных типов");
-            return new Flower(A.Type, A.PlantSize, A.Quantity + B.Quantity);
+            if (A.Type != B.Type || A.CustomName != B.CustomName)
+                throw new InvalidOperationException("Ошибка: нельзя складывать цветы разных видов");
+            return new Flower(A.Type, A.PlantSize, A.Quantity + B.Quantity, A.CustomName);
         }
     }
 
     //Класс для кустов
     public class Bush : Plant
     {
-        //Свойства
+   
         public BushType Type; //Вид куста
+        private string _customName; //Свой вид (поле для хранения)
+        public string CustomName //Свой вид (свойство)
+        {
+            get => _customName;
+            set
+            {
+                if (Type != BushType.Custom)
+                    throw new ArgumentException($"Ошибка: нельзя присвоить этому растению другой вид");
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new ArgumentException("Ошибка: для Custom нужно имя");
+                _customName = value;
+            }
+        }
 
         //Конструктор
-        public Bush(BushType type, Size size)
+        public Bush(BushType type, Size size, string customName = null)
             : base(size)
         {
             Type = type;
+            if (type == BushType.Custom)
+            {
+
+            }
         }
 
         //Реализация абстрактного метода
