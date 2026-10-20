@@ -214,8 +214,7 @@ namespace Pr2_Class
     //Класс для кустов
     public class Bush : Plant
     {
-   
-        public BushType Type; //Вид куста
+        public BushType Type { get; set; } //Вид куста
         private string _customName; //Свой вид (поле для хранения)
         public string CustomName //Свой вид (свойство)
         {
@@ -230,21 +229,32 @@ namespace Pr2_Class
             }
         }
 
-        //Конструктор
+        //Конструкторы
+        //Полный
         public Bush(BushType type, Size size, string customName = null)
             : base(size)
         {
             Type = type;
             if (type == BushType.Custom)
             {
-
+                if (string.IsNullOrWhiteSpace(customName))
+                    throw new ArgumentException("Ошибка: для Custom нужно имя");
+                CustomName = customName;
             }
+        }
+
+        //Копирования
+        public Bush(Bush other)
+            : base(other.PlantSize)
+        {
+            Type = other.Type;
+            CustomName = other.CustomName;
         }
 
         //Реализация абстрактного метода
         public override string GetTypeName()
         {
-            return $"куст {Type}";
+            return $"куст {(Type == BushType.Custom ? CustomName : Type)}";
         }
 
         public void Cut()
@@ -252,10 +262,10 @@ namespace Pr2_Class
             if (PlantSize.Length > 15)
             {
                 PlantSize = new Size(PlantSize.Length - 10);
-                Console.WriteLine($"Вы подрезали {Type}. Размер: {PlantSize.Length}.");
+                Console.WriteLine($"Вы подрезали {(Type == BushType.Custom ? CustomName : Type)}. Размер: {PlantSize}.");
             }
             else
-                Console.WriteLine($"Вы не можете подрезать {Type}: Слишком маленький размер ({PlantSize.Length})");
+                Console.WriteLine($"Вы не можете подрезать {(Type == BushType.Custom ? CustomName : Type)}: Слишком маленький размер ({PlantSize})");
         }
     }
 
@@ -276,7 +286,6 @@ namespace Pr2_Class
     {
         private List<Plant> Plants; //Лист для растений
         public string Name { get; set; } //Название сада
-
         public int PlantCount => Plants.Count; //Количество растений
 
         //Конструкторы
@@ -485,7 +494,6 @@ namespace Pr2_Class
                     continue;
                 }
 
-                // Удаляем (переводим в 0-based индекс)
                 bool removed = garden.RemovePlantAt(choice - 1);
 
                 if (removed == true)
@@ -600,7 +608,7 @@ namespace Pr2_Class
                             Pause();
                             break;
                         }
-                    case "5": Flower.GetTips(flower.Type); Pause(); break;
+                    case "5": Flower.GetTips(flower.Type, flower.CustomName); Pause(); break;
                     case "0": return;
                     default: break;
                 }    
@@ -616,6 +624,8 @@ namespace Pr2_Class
                 Console.WriteLine($"{bush}. Действия");
                 Console.WriteLine("1. Полить");
                 Console.WriteLine("2. Подрезать");
+                Console.WriteLine("3. Добавить такое же");
+                Console.WriteLine("4. Получить инструкции по уходу");
                 Console.WriteLine("0. Назад");
                 Console.Write("Ваш выбор: ");
                 string choice = Console.ReadLine();
@@ -624,6 +634,14 @@ namespace Pr2_Class
                 {
                     case "1": bush.Watering(); Pause(); break;
                     case "2": bush.Cut(); Pause(); break;
+                    case "3":
+                        {
+                            Bush other = new Bush(bush);
+                            garden.AddPlant(other);
+                            Console.WriteLine($"Было добавлено такое же {other}.");
+                            Pause();
+                            break;
+                        }
                     case "0": return;
                     default: break;
                 }
