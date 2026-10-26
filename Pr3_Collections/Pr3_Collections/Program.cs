@@ -12,16 +12,30 @@ namespace Pr3_Collections
         {
             Console.BackgroundColor = ConsoleColor.White;
             Console.ForegroundColor = ConsoleColor.Black;
-            Console.Clear();
 
-            Task1();
-            Task2();
-            Task3();
+
+            while (true)
+            {
+                Console.Clear();
+                Console.WriteLine("ЛАБОРАТОРНАЯ РАБОТА #3");
+                Console.Write("Выберите задание, которое хотите проверить (1-4, для выхода 0): ");
+                string choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "1": Task1(); break;
+                    case "2": Task2(); break;
+                    case "3": Task3(); break;
+                    case "0": return;
+                    default: break;
+                }
+            }
         }
 
         static void Task1()
         {
-            ArrayList list = new ArrayList(); //Создаем обобщенную коллекцию
+            Console.WriteLine("ЗАДАНИЕ 1: НЕОБОБЩЕННЫЕ КОЛЛЕКЦИИ");
+
+            ArrayList list = new ArrayList(); //Создаем необобщенную коллекцию
             Random rnd = new Random();
 
             //Генерируем 5 случайных чисел и добавляем их в коллекцию
@@ -59,9 +73,10 @@ namespace Pr3_Collections
             }
             else
                 Console.WriteLine($"Элемент {searchVal} не найден");
+            Pause();
         }
 
-        //Вспомогательный метод для вывода обобщенной коллекции
+        //Вспомогательный метод для вывода необобщенной коллекции
         static void PrintList(ArrayList collection)
         {
             Console.Write("Содержимое коллекции: ");
@@ -72,6 +87,8 @@ namespace Pr3_Collections
 
         static void Task2()
         {
+            Console.WriteLine("ЗАДАНИЕ 2: ОБОБЩЕННЫЕ КОЛЛЕКЦИИ");
+
             //Создаем стек и заполняем его данными
             Stack<double> stack = new Stack<double>();
             stack.Push(6.7);
@@ -81,11 +98,11 @@ namespace Pr3_Collections
             stack.Push(72.0);
 
             Console.WriteLine("\nПункт A: вывод стека");
-            PrintStack(stack);
+            PrintStackDouble(stack);
 
             Console.WriteLine("\nПункт B: удаление элементов из стека");
             Console.Write("До\n ");
-            PrintStack(stack);
+            PrintStackDouble(stack);
             double deleted;
             int n = 3; //Количество элементов для удаления
             for (int i = 0; i < n && stack.Count() > 0; i++)
@@ -94,12 +111,12 @@ namespace Pr3_Collections
                 Console.WriteLine($" Удалено: {deleted}");
             }
             Console.Write("После\n ");
-            PrintStack(stack);
+            PrintStackDouble(stack);
 
             Console.WriteLine("\nПункт C: добавление элементов в стек разными способами");
             stack.Push(14.88);
             stack.Push(123.45);
-            PrintStack(stack);
+            PrintStackDouble(stack);
 
             Console.WriteLine("\nПункт D: создание двусвязного списка и его заполнение");
             //Создаем двусвязный список и заполняем его данными
@@ -110,20 +127,21 @@ namespace Pr3_Collections
             llist.AddBefore(item, 19.583); //Добавление до узла
 
             Console.WriteLine("\nПункт E: вывод двусвязного списка");
-            PrintLinkedList(llist);
+            PrintLinkedListDouble(llist);
 
             Console.WriteLine("\nПункт F: поиск значения в двусвязном списке");
-            PrintLinkedList(llist);
+            PrintLinkedListDouble(llist);
             double searchVal = 3.14; //Искоомое значение
             bool isFound = llist.Contains(searchVal); //Проверка наличия
             if (isFound == true)
                 Console.WriteLine($"Элемент {searchVal} найден.");
             else
                 Console.WriteLine($"Элемент {searchVal} не найден.");
+            Pause();
         }
 
         //Вспомогательный метод для вывода стека
-        static void PrintStack(Stack<double> stack)
+        static void PrintStackDouble(Stack<double> stack)
         {
             Console.Write("Содержимое стека (сверху вниз): ");
             foreach (var item in stack)
@@ -132,7 +150,7 @@ namespace Pr3_Collections
         }
 
         //Вспомогательный метод для вывода двусвязного списка
-        static void PrintLinkedList(LinkedList<double> llist)
+        static void PrintLinkedListDouble(LinkedList<double> llist)
         {
             Console.Write("Содержимое двусвязного списка: ");
             foreach (var item in llist)
@@ -142,8 +160,37 @@ namespace Pr3_Collections
 
         static void Task3()
         {
-            Monitor m1 = new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS);
-            Console.WriteLine($"\n{m1}");
+            Console.WriteLine("ЗАДАНИЕ 3: ОБОБЩЕННЫЕ КОЛЛЕКЦИИ С ПОЛЬЗОВАТЕЛЬСКИМ ТИПОМ ДАННЫХ");
+
+            //Создаем стек и заполняем его данными
+            Stack<ComputerDevice> stack = new Stack<ComputerDevice>();
+            stack.Push(new ComputerDevice("Razer", "Viper Ultimate"));
+            stack.Push(new ComputerDevice("HyperX", "Cloud Alpha S"));
+            stack.Push(new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS));
+            stack.Push(new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023));
+            Keyboard k1 = stack.Peek();
+            stack.Push((stack.Peek().Clone);
+
+            Console.WriteLine("\nПункт A: вывод стека");
+            PrintStack()
+            Pause();
+        }
+
+        //Вспомогательный метод для вывода стека с пользовательским типом
+        static void PrintStackCD(Stack<ComputerDevice> stack)
+        {
+            foreach (var item in stack)
+            {
+                Console.WriteLine
+                Console.WriteLine($"")
+            }
+        }
+
+
+        static void Pause()
+        {
+            Console.WriteLine("\nДля продолжения нажмите любую клавишу...");
+            Console.ReadKey();
         }
     }
 }
