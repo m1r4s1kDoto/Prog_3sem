@@ -6,8 +6,21 @@ using System.Threading.Tasks;
 
 namespace Pr3_Collections
 {
+    //Реализация интерфейса альтернативного сравнения
+    public class ComputerDeviceModelComparer : IComparer<ComputerDevice>
+    {
+        public int Compare(ComputerDevice x, ComputerDevice y)
+        {
+            if (x == null && y == null) return 0;
+            if (x == null) return -1;
+            if (y == null) return 1;
+
+            return string.Compare(x.Model, y.Model, System.StringComparison.Ordinal);
+        }
+    }
+
     //Класс для девайсов
-    public class ComputerDevice
+    public class ComputerDevice : IComparable<ComputerDevice>, ICloneable 
     {
         public const int MaxMfrLength = 30; //Ограничение для полей
 
@@ -60,6 +73,20 @@ namespace Pr3_Collections
                 throw new ArgumentOutOfRangeException("Ошибка: введенная строка слишком длинная");
         }
 
+        //Метод для сравнения по умолчанию
+        public int CompareTo(ComputerDevice other)
+        {
+            if (other == null)
+                return 1;
+            return string.Compare(this.Manufacturer, other.Manufacturer, StringComparison.Ordinal); //Вернет < 0, если раньше по алфавиту, > 0, если позже по алфавиту
+        }
+
+        //Метод для копирования
+        public object Clone()
+        {
+            return new ComputerDevice(this.Manufacturer, this.Model);
+        }
+
         //Метод для строкового представления
         public override string ToString()
         {
@@ -69,7 +96,7 @@ namespace Pr3_Collections
         //Метод для получения названия устройства
         public virtual string GetName()
         {
-            return $"Устройство {Manufacturer} {Model}";
+            return $"Устройство {Manufacturer} {Model}"; 
         }
     }
 
