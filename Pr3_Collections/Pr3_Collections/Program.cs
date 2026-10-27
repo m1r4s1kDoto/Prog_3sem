@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Pr3_Collections
 {
@@ -33,6 +35,7 @@ namespace Pr3_Collections
 
         static void Task1()
         {
+            Console.Clear();
             Console.WriteLine("ЗАДАНИЕ 1: НЕОБОБЩЕННЫЕ КОЛЛЕКЦИИ");
 
             ArrayList list = new ArrayList(); //Создаем необобщенную коллекцию
@@ -51,6 +54,7 @@ namespace Pr3_Collections
             //Создаем строку и добавляем в коллекцию
             string str = "Sergey";
             list.Add(str);
+            Console.WriteLine($" Добавлено {str}");
             PrintList(list);
 
             Console.WriteLine("\nПункт C: удаление заданного элемента");
@@ -87,6 +91,7 @@ namespace Pr3_Collections
 
         static void Task2()
         {
+            Console.Clear();
             Console.WriteLine("ЗАДАНИЕ 2: ОБОБЩЕННЫЕ КОЛЛЕКЦИИ");
 
             //Создаем стек и заполняем его данными
@@ -101,7 +106,7 @@ namespace Pr3_Collections
             PrintStackDouble(stack);
 
             Console.WriteLine("\nПункт B: удаление элементов из стека");
-            Console.Write("До\n ");
+            Console.WriteLine("До ");
             PrintStackDouble(stack);
             double deleted;
             int n = 3; //Количество элементов для удаления
@@ -110,28 +115,29 @@ namespace Pr3_Collections
                 deleted = stack.Pop();
                 Console.WriteLine($" Удалено: {deleted}");
             }
-            Console.Write("После\n ");
+            Console.WriteLine("После");
             PrintStackDouble(stack);
 
             Console.WriteLine("\nПункт C: добавление элементов в стек разными способами");
             stack.Push(14.88);
+            Console.WriteLine($" Добавлено: {stack.Peek()}");
             stack.Push(123.45);
-            PrintStackDouble(stack);
+            Console.WriteLine($" Добавлено: {stack.Peek()}");
 
             Console.WriteLine("\nПункт D: создание двусвязного списка и его заполнение");
             //Создаем двусвязный список и заполняем его данными
             LinkedList<double> llist = new LinkedList<double>(stack);
             var item = llist.AddLast(72); //Добавление элемента в конец списка
-            llist.AddFirst(99.3); //Добавление элемента в начало списка
-            llist.AddAfter(item, 3.14); //Добавление после узла
-            llist.AddBefore(item, 19.583); //Добавление до узла
+            Console.WriteLine($" Добавлено: {llist.AddFirst(99.3).Value}"); //Добавление элемента в начало списка
+            Console.WriteLine($" Добавлено: {llist.AddAfter(item, 3.14).Value}"); //Добавление после узла
+            Console.WriteLine($" Добавлено: {llist.AddBefore(item, 19.583).Value}"); //Добавление до узла
 
             Console.WriteLine("\nПункт E: вывод двусвязного списка");
             PrintLinkedListDouble(llist);
 
             Console.WriteLine("\nПункт F: поиск значения в двусвязном списке");
             PrintLinkedListDouble(llist);
-            double searchVal = 3.14; //Искоомое значение
+            double searchVal = 3.14; //Искомое значение
             bool isFound = llist.Contains(searchVal); //Проверка наличия
             if (isFound == true)
                 Console.WriteLine($"Элемент {searchVal} найден.");
@@ -160,30 +166,88 @@ namespace Pr3_Collections
 
         static void Task3()
         {
+            Console.Clear();
             Console.WriteLine("ЗАДАНИЕ 3: ОБОБЩЕННЫЕ КОЛЛЕКЦИИ С ПОЛЬЗОВАТЕЛЬСКИМ ТИПОМ ДАННЫХ");
 
             //Создаем стек и заполняем его данными
             Stack<ComputerDevice> stack = new Stack<ComputerDevice>();
             stack.Push(new ComputerDevice("Razer", "Viper Ultimate"));
             stack.Push(new ComputerDevice("HyperX", "Cloud Alpha S"));
+            stack.Push((ComputerDevice)stack.Peek().Clone()); //Демонстрация работы метода клонирования
             stack.Push(new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS));
             stack.Push(new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023));
-            Keyboard k1 = stack.Peek();
-            stack.Push((stack.Peek().Clone);
 
             Console.WriteLine("\nПункт A: вывод стека");
-            PrintStack()
+            PrintStackCD(stack);
+
+            Console.WriteLine("\nПункт B: удаление элементов из стека");
+            Console.WriteLine("До");
+            PrintStackCD(stack);
+            Console.WriteLine();
+            ComputerDevice deleted;
+            int n = 3; //количество элементов для удаления
+            for (int i = 0; i < n; i++)
+            {
+                deleted = stack.Pop();
+                Console.WriteLine($" Удалено: {deleted.GetName()}");
+            }
+            Console.WriteLine("После");
+            PrintStackCD(stack);
+
+            Console.WriteLine("\nПункт C: добавление элементов в стек разными способами");
+            stack.Push(new Monitor("XIAOMI", "G27QI", 27, 2560, 1440, 200, PanelType.IPS));
+            Console.WriteLine($" Добавлено: {stack.Peek().GetName()}");
+            stack.Push(new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023));
+            Console.WriteLine($" Добавлено: {stack.Peek().GetName()}");
+
+            Console.WriteLine("\nПункт D: создание двусвязного списка и его заполнение");
+            //Создаем двусвязный список и заполняем его данными
+            LinkedList<ComputerDevice> llist = new LinkedList<ComputerDevice>(stack);
+            var item = llist.Last; //Взятие последнего узла
+            Console.WriteLine($" Добавлено: {llist.AddFirst(new ComputerDevice("Lamzu", "Atlantis")).Value.GetName()}"); //Добавление элемента в начало списка
+            Console.WriteLine($" Добавлено: {llist.AddLast(new ComputerDevice("Sergey", "Semenov")).Value.GetName()}"); //Добавление элемента в конец списка
+            Console.WriteLine($" Добавлено: {llist.AddAfter(item, new Monitor("LG", "UltraGear OLED", 27.0, 3840, 2160, 240, PanelType.OLED)).Value.GetName()}"); //Добавление элемента после узла
+            Console.WriteLine($" Добавлено: {llist.AddBefore(item, new Monitor("Samsung", "Odyssey G7", 32.0, 2560, 1440, 240, PanelType.VA)).Value.GetName()}");//Добавление элемента до узла
+
+            Console.WriteLine("\nПункт E: вывод двусвязного списка");
+            PrintLinkedListCD(llist);
+
+            Console.WriteLine("\nПункт F: поиск значения в двусвязном списке");
+            ComputerDevice searchDev = new ComputerDevice("Razer", "Viper Ultimate"); //Искомый элемент
+            Console.WriteLine($"Искомый элемент: {searchDev.GetName()}");
+            ComputerDevice foundItem = null;
+            ComputerDeviceModelComparer modelComparer = new ComputerDeviceModelComparer();
+
+            foreach (var dev in llist)
+                if (dev.CompareTo(searchDev) == 0 && modelComparer.Compare(dev, searchDev) == 0) //Демонстрация сравнения по умолчанию и альтернативного сравнения
+                {
+                    foundItem = dev;
+                    break;
+                }
+
+            if (foundItem != null)
+                Console.WriteLine($"Элемент найден: {foundItem.GetName()}");
+            else
+                Console.WriteLine("Элемент не найден в списке.");
+
+
             Pause();
         }
 
         //Вспомогательный метод для вывода стека с пользовательским типом
         static void PrintStackCD(Stack<ComputerDevice> stack)
         {
+            Console.WriteLine("Содержимое стека (сверху вниз):");
             foreach (var item in stack)
-            {
-                Console.WriteLine
-                Console.WriteLine($"")
-            }
+                Console.WriteLine($"{item.GetName()}");
+        }
+
+        //Вспомогательный метод для двусвязного списка с пользовательским типом
+        static void PrintLinkedListCD(LinkedList<ComputerDevice> llist)
+        {
+            Console.WriteLine("Содержимое стека (сверху вниз):");
+            foreach (var item in llist)
+                Console.WriteLine($"{item.GetName()}");
         }
 
 
