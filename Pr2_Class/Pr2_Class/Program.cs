@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.AccessControl;
+using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
 
 namespace Pr2_Class
 {
@@ -266,6 +268,25 @@ namespace Pr2_Class
             }
             else
                 Console.WriteLine($"Вы не можете подрезать {(Type == BushType.Custom ? CustomName : Type)}: Слишком маленький размер ({PlantSize})");
+        }
+
+        //Метод с инструкцией по уходу
+        public static void GetTips(BushType type, string customName = null)
+        {
+            if (type == BushType.Custom && string.IsNullOrWhiteSpace(customName))
+                throw new ArgumentException("Ошибка: для Custom нужно имя");
+
+            string tips = type switch
+            {
+                BushType.Hazel => "Поливайте умеренно, любит полутень, обрезайте весной.",
+                BushType.Lilac => "Поливайте редко, любит солнце, обрезайте после цветения.",
+                BushType.Jasmine => "Поливайте регулярно, любит тепло, не переносит сквозняков.",
+                BushType.Hawthorn => "Поливайте умеренно, неприхотлив, обрезайте осенью.",
+                BushType.Custom => $"Уход за «{customName}»: уточните у продавца.",
+                _ => "Общие советы: поливайте умеренно."
+            };
+
+            Console.WriteLine($"Инструкция по уходу за {(type == BushType.Custom ? customName : type)} : {tips}");
         }
     }
 
@@ -688,6 +709,7 @@ namespace Pr2_Class
 
             garden.Name = name.Trim(); //Сохранение имени с обрезкой лишних пробелов
             Console.WriteLine($"Сад переименован в «{garden.Name}»");
+            Pause();
         }
 
         //Информация о саде
@@ -701,10 +723,10 @@ namespace Pr2_Class
         //Метод для добавления цветка
         static Flower CreateFlower()
         {
-            Console.WriteLine("ДОБАВЛЕНИЕ РАСТЕНИЯ");
+            Console.WriteLine("ДОБАВЛЕНИЕ ЦВЕТКА");
 
             //Вид
-            Console.WriteLine("Доступные виды растений");
+            Console.WriteLine("Доступные виды цветов");
             var types = Enum.GetValues<FlowerType>();
             for (int i = 0; i < types.Length; i++)
                 Console.WriteLine($"{i + 1}. {types[i]}");
@@ -716,6 +738,24 @@ namespace Pr2_Class
                 return null;
             }
             FlowerType type = types[typeIdx - 1];
+
+            string customType = null;
+
+            if (type == FlowerType.Custom)
+            {
+                Console.Write("Введите свой вид: ");
+
+                customType = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(customType))
+                {
+                    Console.WriteLine("\nНазвание не может быть пустым.");
+                    Pause();
+                    return null;
+                }
+
+                customType = customType.Trim(); //Сохранение имени с обрезкой лишних пробелов
+            }
 
             //Длина стебля
             Console.Write("Длина стебля (см): ");
@@ -735,7 +775,7 @@ namespace Pr2_Class
                 return null;
             }
 
-            var flower = new Flower(type, new Size(length), quantity);
+            var flower = new Flower(type, new Size(length), quantity, customType);
             Console.WriteLine($"Добавлено {flower}");
             Pause();
             return flower;
@@ -760,6 +800,24 @@ namespace Pr2_Class
             }
             BushType type = types[typeIdx - 1];
 
+            string customType = null;
+
+            if (type == BushType.Custom)
+            {
+                Console.Write("Введите свой вид: ");
+
+                customType = Console.ReadLine();
+
+                if (string.IsNullOrWhiteSpace(customType))
+                {
+                    Console.WriteLine("\nНазвание не может быть пустым.");
+                    Pause();
+                    return null;
+                }
+
+                customType = customType.Trim(); //Сохранение имени с обрезкой лишних пробелов
+            }
+
             //Длина
             Console.Write("Длина (см): ");
             if (!double.TryParse(Console.ReadLine(), out double length) || length < 0)
@@ -769,7 +827,7 @@ namespace Pr2_Class
                 return null;
             }
 
-            var bush = new Bush(type, new Size(length));
+            var bush = new Bush(type, new Size(length), customType);
             Console.WriteLine($"Добавлено {bush}");
             Pause();
             return bush;
