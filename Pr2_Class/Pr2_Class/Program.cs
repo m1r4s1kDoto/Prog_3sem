@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Security.AccessControl;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml.Linq;
+
 
 namespace Pr2_Class
 {
@@ -131,8 +128,8 @@ namespace Pr2_Class
         public Flower(FlowerType type, Size size, int quantity, string customName = null)
             : base(size) //Вызов конструктора родителя
         {
-            if (quantity > MaxQuantity || quantity < 0)
-                throw new ArgumentException($"Ошибка: количество должно быть от 0 до {MaxQuantity}");
+            if (quantity > MaxQuantity || quantity < 1)
+                throw new ArgumentException($"Ошибка: количество должно быть от 1 до {MaxQuantity}");
             Type = type;
             Quantity = quantity;
             if (type == FlowerType.Custom)
@@ -167,6 +164,11 @@ namespace Pr2_Class
         //Метод для вдыхания аромата
         public void Smelling()
         {
+            if (Quantity == 0)
+            {
+                Console.WriteLine("Нельзя вдохнуть аромат, так как количество стеблей равно нулю");
+                return;
+            }
             Console.WriteLine($"Вы вдохнули аромат {(Type == FlowerType.Custom ? CustomName : Type)}. Надеемся, у вас нет никакой аллергии.");
         }
 
@@ -663,6 +665,7 @@ namespace Pr2_Class
                             Pause();
                             break;
                         }
+                    case "4": Bush.GetTips(bush.Type, bush.CustomName); Pause(); break;
                     case "0": return;
                     default: break;
                 }
@@ -840,4 +843,3 @@ namespace Pr2_Class
         }
     }
 }
-//Заметка - переопределение
