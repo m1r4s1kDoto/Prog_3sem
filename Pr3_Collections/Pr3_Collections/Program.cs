@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+using System.Collections.ObjectModel;
 
 namespace Pr3_Collections
 {
@@ -20,6 +19,13 @@ namespace Pr3_Collections
             {
                 Console.Clear();
                 Console.WriteLine("ЛАБОРАТОРНАЯ РАБОТА #3");
+                Console.WriteLine("1. Необобщенные коллекции");
+                Console.WriteLine("2. Обобщенные коллекции");
+                Console.WriteLine("3. Обобщенные коллекции с пользовательским типом данных");
+                Console.WriteLine("4. Наблюдаемые коллекции");
+
+
+
                 Console.Write("Выберите задание, которое хотите проверить (1-4, для выхода 0): ");
                 string choice = Console.ReadLine();
                 switch (choice)
@@ -27,6 +33,7 @@ namespace Pr3_Collections
                     case "1": Task1(); break;
                     case "2": Task2(); break;
                     case "3": Task3(); break;
+                    case "4": Task4(); break;
                     case "0": return;
                     default: break;
                 }
@@ -248,6 +255,65 @@ namespace Pr3_Collections
             Console.WriteLine("Содержимое стека (сверху вниз):");
             foreach (var item in llist)
                 Console.WriteLine($"{item.GetName()}");
+        }
+
+        static void Task4()
+        {
+            Console.Clear();
+            Console.WriteLine("ЗАДАНИЕ 4: НАБЛЮДАЕМЫЕ КОЛЛЕКЦИИ");
+
+            ObservableCollection<ComputerDevice> observableDevices = new ObservableCollection<ComputerDevice>(); //Создаем наблюдаемыую коллекцию 
+            observableDevices.CollectionChanged += CDCollection_CollectionChanged; //Регистрируем метод-обработчик на событие CollectionChanged
+
+            //Добавляем элементы
+            Console.WriteLine("\nДобавление элементов");
+            observableDevices.Add(new ComputerDevice("Lamzu", "Atlantis"));
+            observableDevices.Add(new Monitor("LG", "UltraGear OLED", 27.0, 3840, 2160, 240, PanelType.OLED));
+            observableDevices.Add(new Keyboard("AULA", "F75", KeyboardType.Mechanical, true, 1023));
+
+            //Удаляем элемент
+            Console.WriteLine("\nУдаление элементов");
+            var toRemove = observableDevices.FirstOrDefault(d => d.Manufacturer == "Lamzu" && d.Model == "Atlantis");
+            observableDevices.Remove(toRemove); //По указателю
+            observableDevices.RemoveAt(1); //По индексу
+
+            //Очищаем коллекцию
+            Console.WriteLine("\nОчистка коллекции");
+            observableDevices.Clear();
+
+            observableDevices.CollectionChanged -= CDCollection_CollectionChanged; //Отписываемся от события
+
+            Pause();
+        }
+
+        //Произвольный метод-обработчик CollectionChange                  контейнер с событиями
+        private static void CDCollection_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            //Свойство e.Action показывает, какое именно действие произошло с коллекцией 
+            switch (e.Action)
+            {
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Add: //Добавление
+                    Console.WriteLine("[СОБЫТИЕ] в коллекцию добавлен новый элемент(ы):");
+                    if (e.NewItems != null)
+                        foreach (ComputerDevice newItem in e.NewItems)
+                            Console.WriteLine($" +{newItem}");
+                    break;
+
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Remove: //Удаление
+                    Console.WriteLine("[СОБЫТИЕ] из коллекции удален элемент(ы):");
+                    if (e.OldItems != null)
+                        foreach (ComputerDevice oldItem in e.OldItems)
+                            Console.WriteLine($" -{oldItem}");
+                    break;
+
+                case System.Collections.Specialized.NotifyCollectionChangedAction.Reset: //Очистка
+                    Console.WriteLine("[СОБЫТИЕ] коллекция была полностью очищена");
+                    break;
+
+                default:
+                    Console.WriteLine($"[СОБЫТИЕ] Произошло действие: {e.Action}");
+                    break;
+            }
         }
 
 
