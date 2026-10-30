@@ -274,7 +274,7 @@ namespace Pr3_Collections
             //Удаляем элемент
             Console.WriteLine("\nУдаление элементов");
             var toRemove = observableDevices.FirstOrDefault(d => d.Manufacturer == "Lamzu" && d.Model == "Atlantis");
-            observableDevices.Remove(toRemove); //По указателю
+            observableDevices.Remove(toRemove); //По ссылке
             observableDevices.RemoveAt(1); //По индексу
 
             //Очищаем коллекцию
@@ -296,14 +296,14 @@ namespace Pr3_Collections
                     Console.WriteLine("[СОБЫТИЕ] в коллекцию добавлен новый элемент(ы):");
                     if (e.NewItems != null)
                         foreach (ComputerDevice newItem in e.NewItems)
-                            Console.WriteLine($" +{newItem}");
+                            Console.WriteLine($" +{newItem.GetName()}");
                     break;
 
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Remove: //Удаление
                     Console.WriteLine("[СОБЫТИЕ] из коллекции удален элемент(ы):");
                     if (e.OldItems != null)
                         foreach (ComputerDevice oldItem in e.OldItems)
-                            Console.WriteLine($" -{oldItem}");
+                            Console.WriteLine($" -{oldItem.GetName()}");
                     break;
 
                 case System.Collections.Specialized.NotifyCollectionChangedAction.Reset: //Очистка
