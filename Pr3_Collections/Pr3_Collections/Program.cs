@@ -18,7 +18,7 @@ namespace Pr3_Collections
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("ЛАБОРАТОРНАЯ РАБОТА #3");
+                Console.WriteLine("ПРАКТИЧЕСКАЯ РАБОТА #3");
                 Console.WriteLine("1. Необобщенные коллекции");
                 Console.WriteLine("2. Обобщенные коллекции");
                 Console.WriteLine("3. Обобщенные коллекции с пользовательским типом данных");
