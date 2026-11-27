@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.InteropServices;
 
 namespace Lab2_OOP
 {
@@ -29,7 +31,7 @@ namespace Lab2_OOP
             {
                 //Идем к элементу от вершины
                 SNode curr = Top;
-                for (int i = 0; i < idx && curr == null; i++)
+                for (int i = 0; i < idx && curr != null; i++)
                     curr = curr.Next;
                 if (curr == null)
                     throw new IndexOutOfRangeException();
@@ -178,6 +180,58 @@ namespace Lab2_OOP
             for (SNode curr = Top; curr != null; curr = curr.Next)
                 items.Add(curr.Value);
             return string.Join(" -> ", items);
+        }
+    }
+
+    //Статический класс с методами расширения
+    public static class Extensions
+    {
+        //Метод для подсчета количества предложений в строке
+        public static int SentenceCount(this string str)
+        {
+            //Если пустая строка
+            if (string.IsNullOrWhiteSpace(str))
+                return 0;
+
+            int count = 0;
+            bool trailingText = false; //остаточный текст
+
+            for (int i = 0; i < str.Length; i++)
+            {
+                char c = str[i];
+                if (c == '.' || c == '!' || c == '?')
+                {
+                    //Многоточие
+                    if (c == '.' && i + 1 < str.Length && str[i + 1] == '.')
+                        // Пропускаем все остальные точки в многоточии
+                        while (i + 1 < str.Length && str[i + 1] == '.')
+                            i++;
+                    count++;
+                    trailingText = false;
+                }
+                else if (!char.IsWhiteSpace(c))
+                    trailingText = true;
+            }
+
+            //Засчитываем остаточный тест как предложение
+            if (trailingText)
+                count++;
+
+            return count;
+        }
+
+        //Метод для определения среднего элемента стека
+        public static int Middle(this Stack stack)
+        {
+            if (stack == null)
+                throw new ArgumentNullException(nameof(stack));
+
+            if (stack.Count == 0)
+                throw new InvalidOperationException("Стек пуст, невозможно определить средний элемент");
+
+            int middleIdx = (stack.Count - 1) / 2; //для четного count будет выбран элемент левее
+            return stack[middleIdx];
+
         }
     }
 
